@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.balancloud</groupId>
+        <artifactId>balancloud-backend</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>balan-server</artifactId>
+    <name>balan-server</name>
+    <description>启动壳：社区版（AGPL-3.0，纯开源 core）</description>
+
+    <properties>
+        <edition.suffix>community</edition.suffix>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.balancloud</groupId>
+            <artifactId>balan-core</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>balancloud-${project.version}-${edition.suffix}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

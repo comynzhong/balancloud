@@ -1,0 +1,35 @@
+{
+  "name": "衡电云控",
+  "appid": "",
+  "description": "衡电云控 BALANCLOUD 充电小程序",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "vueVersion": "3",
+  "h5": {
+    "title": "衡电云控",
+    "router": {
+      "mode": "hash"
+    },
+    "devServer": {
+      "port": 5175
+    }
+  },
+  "mp-weixin": {
+    "appid": "wx345da33be78d5fc0",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "minified": true
+    },
+    "usingComponents": true,
+    "permission": {
+      "scope.userLocation": {
+        "desc": "你的位置将用于展示附近充电场站与距离排序"
+      }
+    },
+    "requiredPrivateInfos": [
+      "getLocation"
+    ]
+  }
+}

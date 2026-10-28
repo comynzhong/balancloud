@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  backend:
+    name: 后端测试与社区版构建
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      # 纯逻辑单元测试，不需要 MySQL / Redis / EMQX / TDengine
+      - name: Maven 测试
+        run: mvn -B -ntp test
+
+      - name: 打包社区版启动壳
+        run: mvn -B -ntp -q package -DskipTests
+
+      - name: 校验产物
+        run: ls -l balan-server/target/balancloud-*-community.jar
+
+  frontend:
+    name: 前端构建
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '12'
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 生产构建
+        run: pnpm build:prod
+
+  miniapp:
+    name: 小程序构建
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: miniapp
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: miniapp/package-lock.json
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: H5 构建
+        run: npm run build:h5
+
+      - name: 微信小程序构建
+        run: npm run build:mp-weixin

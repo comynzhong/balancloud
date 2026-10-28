@@ -1,0 +1,11 @@
+-- 已部署环境的 TDengine 租户标签迁移（新部署不用跑，init.sql 里已经带了 tenant_id）。
+--
+-- 超级表加标签只对之后新建的子表生效：TDengine 不支持 UPDATE 标签，
+-- 且向已存在的子表写入时会忽略 USING ... TAGS 里的新值，所以存量子表的 tenant_id 会是 NULL。
+-- 因为 device_metric 只保留 7 天，且查询按 charger_id 过滤（charger_id 全局唯一、已归属租户），
+-- NULL 不影响隔离正确性；要一次性洗干净就执行：
+--
+--   DROP STABLE IF EXISTS balan_metrics.device_metric;
+--   -- 然后重放 deploy/tdengine/init.sql，测点写入时会自动按 tenant_id 建子表
+--
+ALTER STABLE balan_metrics.device_metric ADD TAG tenant_id BIGINT;

@@ -1,0 +1,3 @@
+com.balancloud.spi.defaults.SpiDefaultsAutoConfiguration
+com.balancloud.device.protocol.ProtocolAutoConfiguration
+com.balancloud.order.flow.OrderFlowAutoConfiguration

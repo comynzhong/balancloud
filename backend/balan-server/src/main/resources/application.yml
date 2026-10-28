@@ -1,0 +1,134 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: balancloud
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://localhost:3306/balancloud?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:balan}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      pool-name: BalanHikariPool
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    # 社区版迁移只用 ≤V99 段，菜单 1–899
+    locations: classpath:db/migration/core
+    # 两段共用一张 flyway_schema_history：标准版库已经记到 V5xx，此后再补的 core 迁移（≤V99）
+    # 版本号必然更低，不开 out-of-order 会在启动校验时报「resolved migration not applied」。
+    out-of-order: true
+  task:
+    scheduling:
+      # 主调度池：@Scheduled 全部跑在这里。Boot 只在容器里没有 TaskScheduler bean 时才按这些属性建池，
+      # 项目自建的主池 Bean 名固定为 taskScheduler 并复用 Boot 的 builder，所以这组属性仍是唯一来源。
+      pool:
+        size: ${SCHEDULING_POOL_SIZE:4}
+      thread-name-prefix: balan-sched-
+      shutdown:
+        await-termination: true
+        await-termination-period: 10s
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: '2'
+      logic-not-delete-value: '0'
+
+balan:
+  # 版本标识：community = 仅开源 core；standard profile 会覆盖成 standard
+  edition: ${BALAN_EDITION:community}
+  token:
+    secret: ${JWT_SECRET:balancloud-dev-only-jwt-secret-please-change-in-production-2026}
+    expire-minutes: 720
+  wechat:
+    app-id: ${WECHAT_APP_ID:}
+    app-secret: ${WECHAT_APP_SECRET:}
+  miniapp:
+    token-expire-minutes: ${APP_TOKEN_EXPIRE_MINUTES:10080}
+    dev-login-enabled: ${APP_DEV_LOGIN:false}
+  mqtt:
+    enabled: ${MQTT_ENABLED:true}
+    broker-url: ${MQTT_BROKER_URL:tcp://localhost:1883}
+    client-id: ${MQTT_CLIENT_ID:balancloud-community}
+    username: ${MQTT_USERNAME:}
+    password: ${MQTT_PASSWORD:}
+    qos: 1
+    # 共享订阅消费组：多实例各连一份，broker 只把每条报文投给组内一个实例；留空退回普通订阅
+    shared-group: ${MQTT_SHARED_GROUP:balancloud}
+    dedupe-enabled: ${MQTT_DEDUPE:true}
+    dedupe-ttl-seconds: ${MQTT_DEDUP_TTL:300}
+  scheduling:
+    # 晨报专用池：与主池分开，8:00 的按租户推送不再排在秒级 tick 后面。1 条够用（推送本身串行）
+    report-pool-size: ${REPORT_SCHEDULER_POOL_SIZE:1}
+    report-await-termination-seconds: ${REPORT_SCHEDULER_AWAIT_SECONDS:10}
+  cluster:
+    # 实例标识，留空按主机名 + 随机串生成；同机多实例用 --spring.profiles.active 或环境变量区分即可
+    instance-id: ${CLUSTER_INSTANCE_ID:}
+    ws-channel: ${CLUSTER_WS_CHANNEL:balancloud:ws:event}
+    ws-broadcast: ${CLUSTER_WS_BROADCAST:true}
+  tdengine:
+    enabled: ${TDENGINE_ENABLED:true}
+    url: ${TDENGINE_URL:http://localhost:6041}
+    username: ${TDENGINE_USERNAME:root}
+    password: ${TDENGINE_PASSWORD:taosdata}
+    database: ${TDENGINE_DATABASE:balan_metrics}
+  # 标准版「集群监控」读取 EMQX 5 Dashboard REST API；密码不设默认值，
+  # 本地写在 gitignore 的 application-local.yml，部署用 EMQX_API_PASSWORD 注入。
+  emqx:
+    enabled: ${EMQX_API_ENABLED:true}
+    url: ${EMQX_API_URL:http://localhost:18083}
+    username: ${EMQX_API_USERNAME:admin}
+    password: ${EMQX_API_PASSWORD:}
+    timeout-seconds: ${EMQX_API_TIMEOUT:3}
+  ocpp:
+    # /ocpp/{identity} WebSocket 端点开关；关掉后不注册端点
+    enabled: ${OCPP_ENABLED:true}
+    # 握手 Basic 认证默认关闭；凭据只从环境变量读，不写配置文件、不入库
+    auth-enabled: ${OCPP_AUTH_ENABLED:false}
+    basic-user: ${OCPP_BASIC_USER:}
+    basic-password: ${OCPP_BASIC_PASSWORD:}
+    simulator:
+      # 后台内置模拟器本质是让后端起子进程，生产必须保持 false
+      enabled: ${OCPP_SIMULATOR_ENABLED:false}
+      python: ${OCPP_SIMULATOR_PYTHON:python}
+      script-path: ${OCPP_SIMULATOR_SCRIPT:tools/ocpp-sim/sim.py}
+      # 留空按 ws://127.0.0.1:${server.port} 推
+      url: ${OCPP_SIMULATOR_URL:}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.balancloud: info
+    org.springframework.security: warn

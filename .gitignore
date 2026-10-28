@@ -1,0 +1,30 @@
+# local environment / secrets
+deploy/.env
+.env
+deploy/backups/
+
+# reference-only upstream repository
+100charge/
+
+# build outputs
+backend/**/target/
+backend/logs/
+backend/balan-server/src/main/resources/application-local.yml
+frontend/node_modules/
+frontend/dist/
+frontend/dist-*/
+frontend/.env.local
+miniapp/node_modules/
+miniapp/dist/
+miniapp/.env.local
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# scratch: 本地验收脚本与导出样本，不进仓库
+tmp/
+__pycache__/
+*.pem
+.DS_Store

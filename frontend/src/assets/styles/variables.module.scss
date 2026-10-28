@@ -1,0 +1,38 @@
+// base color
+$blue: #324157;
+$light-blue: #3A71A8;
+$red: #C03639;
+$pink: #E65D6E;
+$green: #30B08F;
+$tiffany: #4AB7BD;
+$yellow: #FEC171;
+$panGreen: #30B08F;
+
+// 深色侧栏（品牌轨道）设计变量
+$rail-bg: #0C231D;
+$rail-hover: #14342A;
+$rail-accent: #2BD69B;
+$rail-fg: rgba(226, 240, 235, 0.62);
+$rail-fg-strong: #F2F8F5;
+$rail-width: 236px;
+$rail-width-collapsed: 70px;
+
+// 菜单（供 JS 传入 el-menu 的颜色属性）
+$base-menu-color: $rail-fg;
+$base-menu-background: $rail-bg;
+$base-sub-menu-background: #0A1E19;
+
+$--color-primary: #00A870;
+$--color-success: #67C23A;
+$--color-warning: #E6A23C;
+$--color-danger: #F56C6C;
+$--color-info: #909399;
+
+$base-sidebar-width: $rail-width;
+
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuColor: $base-menu-color;
+  menuBackground: $base-menu-background;
+}
