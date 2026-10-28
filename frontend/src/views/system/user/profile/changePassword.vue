@@ -3,10 +3,7 @@
     <div class="pwd-card">
       <header class="brand">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="16" rx="4" />
-            <path d="M7 9v3M11 9v3M15 9v3M19 9v3M7 16h10" />
-          </svg>
+          <img :src="logo" alt="" />
         </span>
         <div class="brand-text">
           <div class="mark-cn">{{ runtime.brand.name }}</div>
@@ -46,6 +43,7 @@ import { updateUserPwd } from '@/api/system/user'
 import { setToken } from '@/utils/auth'
 import useRuntimeStore from '@/store/modules/runtime'
 import useUserStore from '@/store/modules/user'
+import logo from '@/assets/logo/logo.png'
 
 defineOptions({ name: 'ChangePassword' })
 
@@ -161,18 +159,15 @@ onMounted(() => {
 }
 
 .brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  flex: none;
   width: 42px;
   height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #00a870, #0fb981);
-  color: #fff;
+  filter: drop-shadow(0 6px 14px rgba(4, 96, 70, 0.22));
 
-  svg {
-    width: 22px;
-    height: 22px;
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 }
 

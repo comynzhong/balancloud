@@ -418,6 +418,16 @@ cd deploy && ./scripts/reset-demo-data.sh --yes   # 复位演示数据（用 doc
 - 贡献请读 [CONTRIBUTING.md](CONTRIBUTING.md)：功能性变更先开 Issue 对齐场景；表结构必须走 Flyway 新迁移（`V{n}__*.sql`），不改历史迁移；改到计费/费率校验/告警判定要补单测，`mvn -B test` 必须绿；不要提交密钥（`deploy/.env`、`application-local.yml` 已 gitignore，新增配置请同步提供 `.example`，占位值写 `change_me_*`）；贡献需签署 CLA（DCO 不足以支撑 AGPL + 商业双许可的再授权）。
 - **有事就开 Issue**：缺陷、功能请求、接入自己桩遇到的问题，都直接在仓库开 Issue；需要商业许可（私有化部署标准版、以标准版为基础对外提供服务、去品牌二次分发）也先开 Issue 说明场景，授权范围、报价与 SLA 逐单约定——本仓库不挂价目表，也不承诺没实现的能力。
 
+### 公众号
+
+版本更新和实现踩坑写在公众号，商业询价不走这里、仍然走上面的 Issue 渠道（留痕、可追溯，也不会有人私聊我承诺没做的能力）。
+
+<p align="center">
+  <a href="http://weixin.qq.com/r/mp/ZSBheVfE-AqDrRMa93V3"><img src="docs/wechat-mp-qrcode.png" width="215" alt="微信公众号二维码：扫码或在微信里点开链接即可关注"></a>
+  <br>
+  <sub>扫码，或在微信里打开 <a href="http://weixin.qq.com/r/mp/ZSBheVfE-AqDrRMa93V3">weixin.qq.com/r/mp/ZSBheVfE-AqDrRMa93V3</a></sub>
+</p>
+
 ## FAQ
 
 **没有真实充电桩能体验吗？** 能。仿真器是 3 台设备 24 个端口，走的是和真实设备一样的 MQTT/OCPP 链路，可以启动充电、注入故障、观察报文、看告警与结算。

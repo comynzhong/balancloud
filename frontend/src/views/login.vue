@@ -3,10 +3,7 @@
     <header class="brand">
       <div class="brand-row">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="16" rx="4" />
-            <path d="M7 9v3M11 9v3M15 9v3M19 9v3M7 16h10" />
-          </svg>
+          <img :src="logo" alt="" />
         </span>
         <div class="brand-text">
           <div class="mark-cn">{{ runtime.brand.name }}</div>
@@ -377,6 +374,7 @@ import Cookies from "js-cookie";
 import { encrypt, decrypt } from "@/utils/jsencrypt";
 import useUserStore from '@/store/modules/user'
 import useRuntimeStore from '@/store/modules/runtime'
+import logo from '@/assets/logo/logo.png'
 import { getCodeImg } from "@/api/login";
 import { getRegistrationStatus, applyTenantRegistration } from "@/api/balan/runtime";
 
@@ -585,19 +583,15 @@ getCookie();
   }
 
   .brand-mark {
-    display: grid;
-    place-items: center;
     flex: none;
     width: 44px;
     height: 44px;
-    border-radius: 13px;
-    background: linear-gradient(145deg, #12c07c, #06825f);
-    color: #f2fffa;
-    box-shadow: 0 10px 22px rgba(4, 96, 70, 0.28);
+    filter: drop-shadow(0 10px 22px rgba(4, 96, 70, 0.28));
 
-    svg {
-      width: 22px;
-      height: 22px;
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
   }
 
