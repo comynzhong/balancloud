@@ -67,6 +67,10 @@ balan:
   token:
     secret: ${JWT_SECRET:balancloud-dev-only-jwt-secret-please-change-in-production-2026}
     expire-minutes: 720
+  security:
+    # 浏览器来源白名单，HTTP CORS 与 /ws/events 握手共用。
+    # 浏览器对同源 POST 也会带 Origin：部署地址不是 localhost 时必须把页面来源加进来，否则登录被判 403。
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
   wechat:
     app-id: ${WECHAT_APP_ID:}
     app-secret: ${WECHAT_APP_SECRET:}

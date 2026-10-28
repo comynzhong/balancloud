@@ -11,6 +11,10 @@ spring:
       password: your_redis_password
 
 # balan:
+#   security:
+#     # 从 localhost 以外的地址访问前端时，把页面来源加进来（支持 * 端口通配），
+#     # 否则浏览器在登录 POST 上带的 Origin 会被判 403 Invalid CORS request
+#     allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*,http://<你的访问地址>:*
 #   mqtt:
 #     broker-url: tcp://127.0.0.1:1883
 #   tdengine:

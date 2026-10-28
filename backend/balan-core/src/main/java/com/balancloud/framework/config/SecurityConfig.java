@@ -34,19 +34,22 @@ public class SecurityConfig {
     private final PasswordResetRequiredFilter passwordResetRequiredFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final WebOriginProperties webOriginProperties;
 
     public SecurityConfig(ApiRateLimitFilter apiRateLimitFilter,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
                           AppAuthenticationFilter appAuthenticationFilter,
                           PasswordResetRequiredFilter passwordResetRequiredFilter,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
-                          RestAccessDeniedHandler accessDeniedHandler) {
+                          RestAccessDeniedHandler accessDeniedHandler,
+                          WebOriginProperties webOriginProperties) {
         this.apiRateLimitFilter = apiRateLimitFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.appAuthenticationFilter = appAuthenticationFilter;
         this.passwordResetRequiredFilter = passwordResetRequiredFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.webOriginProperties = webOriginProperties;
     }
 
     @Bean
@@ -83,7 +86,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+        configuration.setAllowedOriginPatterns(webOriginProperties.getAllowedOriginPatterns());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Content-Disposition"));

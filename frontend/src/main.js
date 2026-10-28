@@ -82,3 +82,16 @@ app.use(ElementPlus, {
 })
 
 app.mount('#app')
+
+// 启动页等首屏路由就绪再淡出：挂载时登录页组件还在按需加载，立刻收起会先露一屏白底。
+// 末尾的定时器是兜底——路由守卫卡在接口上时不能让启动页永远盖着。
+const splash = document.getElementById('splash')
+const dismissSplash = () => {
+  if (!splash || splash.classList.contains('is-out')) {
+    return
+  }
+  splash.classList.add('is-out')
+  setTimeout(() => splash.remove(), 450)
+}
+router.isReady().then(dismissSplash, dismissSplash)
+setTimeout(dismissSplash, 5000)

@@ -13,17 +13,20 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final EventStreamHandler eventStreamHandler;
     private final EventStreamAuthInterceptor eventStreamAuthInterceptor;
+    private final WebOriginProperties webOriginProperties;
 
     public WebSocketConfig(EventStreamHandler eventStreamHandler,
-                           EventStreamAuthInterceptor eventStreamAuthInterceptor) {
+                           EventStreamAuthInterceptor eventStreamAuthInterceptor,
+                           WebOriginProperties webOriginProperties) {
         this.eventStreamHandler = eventStreamHandler;
         this.eventStreamAuthInterceptor = eventStreamAuthInterceptor;
+        this.webOriginProperties = webOriginProperties;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(eventStreamHandler, "/ws/events")
                 .addInterceptors(eventStreamAuthInterceptor)
-                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*");
+                .setAllowedOriginPatterns(webOriginProperties.getAllowedOriginPatterns().toArray(new String[0]));
     }
 }
