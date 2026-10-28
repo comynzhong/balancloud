@@ -88,6 +88,31 @@ public class AuthService {
         return token;
     }
 
+    /**
+     * 机器请求的主体装载（§60.2）。调用前必须先把租户写进 {@link TenantContext}：
+     * {@code sys_user} 的查询被 core 的租户拦截器限定，「查不到人」本身就是跨租户绑定的拒绝，
+     * 不需要另写一条租户比对。
+     *
+     * <p>三种情况一律拒绝、不降级放行：账号已删除（逻辑删除让 {@code selectById} 直接查不到）、
+     * 已停用、仍处初密未改。最后一条与 §58 的 428 同源——身份未经本人确认的账号不拿去对外读数。
+     */
+    public LoginUser machineSubject(Long userId) {
+        if (userId == null) {
+            throw new ServiceException(4012, "该密钥未绑定后台账号");
+        }
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new ServiceException(4012, "绑定的后台账号不存在或不属于本运营商");
+        }
+        if (!"0".equals(user.getStatus())) {
+            throw new ServiceException(4012, "绑定的后台账号已停用，密钥随之失效");
+        }
+        if ("1".equals(user.getPwdResetRequired())) {
+            throw new ServiceException(4012, "绑定的后台账号尚未修改初始密码");
+        }
+        return buildLoginUser(user, roleMapper.selectRoleKeysByUserId(user.getUserId()));
+    }
+
     private LoginUser buildLoginUser(SysUser user, List<String> roleKeys) {
         LoginUser loginUser = new LoginUser();
         // 账号查询本身已被租户拦截器限定，登录成功的租户就是查询所在租户。

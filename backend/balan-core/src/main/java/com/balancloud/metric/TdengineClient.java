@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Component
 public class TdengineClient {
@@ -131,6 +132,62 @@ public class TdengineClient {
                     row.path(3).isNull() ? null : row.path(3).asDouble(),
                     row.path(4).isNull() ? null : row.path(4).asDouble(),
                     row.path(5).isNull() ? null : row.path(5).asDouble()
+            ));
+        }
+        return points;
+    }
+
+    /** 批量查询的设备数上限（§60.3）：一桩多口再加同站对比，20 台够一次诊断用；再宽就是拿时序库当全库扫。 */
+    public static final int MAX_BATCH_CHARGERS = 20;
+
+    /** 批量查询的时间窗上限，与单设备曲线同一个 1440 分钟。 */
+    public static final int MAX_BATCH_MINUTES = 1440;
+
+    /** 批量查询的总点数上限，与单设备曲线同一个 5000。 */
+    public static final int MAX_BATCH_POINTS = 5000;
+
+    /**
+     * 按设备 ID 集合批量取测点（§60.3）。与 {@link #queryHistory} 有两处刻意不同：
+     *
+     * <p>一是超限<b>明确抛 400</b>而不是 {@code Math.min} 静默夹。调用方是机器消费者，
+     * 静默截断会把「只回了 20 台」读成「这个站只有 20 台」，得出错的结论；单设备曲线夹一下没人受影响。
+     *
+     * <p>二是这里的 {@code chargerIds} 必须是调用方<b>先过 MySQL 场站范围校验</b>解析出来的合法集合：
+     * 本方法的 SQL 只有 {@code charger_id IN (...)}，时序库这一层没有租户与场站概念，
+     * 直接吃调用方给的设备号等于绕过 {@code StationScopeService}（§60.3 写死的隔离顺序）。
+     */
+    public List<MetricSeriesPoint> queryBatch(List<Long> chargerIds, Integer portNo, int minutes, int limit) {
+        if (chargerIds == null || chargerIds.isEmpty()) {
+            throw new ServiceException(400, "至少指定一台设备");
+        }
+        if (chargerIds.size() > MAX_BATCH_CHARGERS) {
+            throw new ServiceException(400, "一次最多查 " + MAX_BATCH_CHARGERS + " 台设备，当前给了 " + chargerIds.size() + " 台");
+        }
+        if (minutes < 1 || minutes > MAX_BATCH_MINUTES) {
+            throw new ServiceException(400, "时间窗必须在 1 到 " + MAX_BATCH_MINUTES + " 分钟之间");
+        }
+        if (limit < 1 || limit > MAX_BATCH_POINTS) {
+            throw new ServiceException(400, "返回点数必须在 1 到 " + MAX_BATCH_POINTS + " 之间");
+        }
+        String start = LocalDateTime.now(ZONE).minusMinutes(minutes).format(TS_FORMAT);
+        String inList = chargerIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String portFilter = portNo == null ? "" : " AND port_no = " + portNo;
+        String sql = "SELECT ts, charger_id, port_no, voltage, current_a, temperature, power_kw, energy_total "
+                + "FROM device_metric WHERE charger_id IN (" + inList + ")"
+                + " AND ts >= '" + start + "'" + portFilter
+                + " ORDER BY charger_id ASC, ts ASC LIMIT " + limit;
+        JsonNode root = execute(sql);
+        List<MetricSeriesPoint> points = new ArrayList<>();
+        for (JsonNode row : root.path("data")) {
+            points.add(new MetricSeriesPoint(
+                    row.path(1).asLong(),
+                    row.path(2).asInt(),
+                    parseTimestamp(row.path(0).asText()),
+                    row.path(3).isNull() ? null : row.path(3).asDouble(),
+                    row.path(4).isNull() ? null : row.path(4).asDouble(),
+                    row.path(5).isNull() ? null : row.path(5).asDouble(),
+                    row.path(6).isNull() ? null : row.path(6).asDouble(),
+                    row.path(7).isNull() ? null : row.path(7).asDouble()
             ));
         }
         return points;

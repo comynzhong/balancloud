@@ -24,6 +24,10 @@ public class StaffDeviceCardVo {
     private LocalDateTime lastMetricAt;
     private BigDecimal ratedVoltage;
     private BigDecimal ratedPowerKw;
+    /** 过温阈值（§60.1）：没有这条线，读到 68℃ 也无从判断是否越限——告警判的就是它。 */
+    private BigDecimal overTempC;
+    /** 过流阈值，同上。 */
+    private BigDecimal overCurrentA;
     private String firmwareVersion;
     private Integer portCount;
 

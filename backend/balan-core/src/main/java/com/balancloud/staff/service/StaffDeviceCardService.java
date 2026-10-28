@@ -129,6 +129,8 @@ public class StaffDeviceCardService {
         card.setLastMetricAt(charger.getLastMetricAt());
         card.setRatedVoltage(charger.getRatedVoltage());
         card.setRatedPowerKw(charger.getRatedPowerKw());
+        card.setOverTempC(charger.getOverTempC());
+        card.setOverCurrentA(charger.getOverCurrentA());
         card.setFirmwareVersion(charger.getFirmwareVersion());
         card.setPortCount(charger.getPortCount());
         card.setCanStop(permissionService.hasPermi("charger:stop"));
