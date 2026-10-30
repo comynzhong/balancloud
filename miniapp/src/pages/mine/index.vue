@@ -84,6 +84,12 @@
           <text class="menu-value">{{ staffProfile.nickName || staffProfile.username }}</text>
           <view class="chev"></view>
         </view>
+        <view v-else-if="staffReady" class="menu-item" @tap="goStaffLogin">
+          <view class="menu-ic">维</view>
+          <text class="menu-text">我是运维</text>
+          <text class="menu-value">用后台账号登录</text>
+          <view class="chev"></view>
+        </view>
       </view>
 
       <view class="card menu">
@@ -147,6 +153,7 @@ const finishedCount = ref(0)
 const vehicleCount = ref(0)
 const walletBalance = ref('0.00')
 const staffProfile = ref(null)
+const staffReady = ref(false)
 
 const avatarText = computed(() => {
   const name = userStore.displayName || '充'
@@ -154,6 +161,7 @@ const avatarText = computed(() => {
 })
 
 async function load() {
+  probeStaff()
   try {
     await userStore.ensureLogin()
     const [activePage, finishedPage, stations, vehicles, wallet] = await Promise.all([
@@ -172,7 +180,6 @@ async function load() {
     const firstWithPhone = (stations || []).find((s) => s.phone)
     if (firstWithPhone) stationPhone.value = firstWithPhone.phone
     await orderStore.refreshActive().catch(() => {})
-    await probeStaff()
   } catch (e) {
     if (e.code !== 401) {
       // 静默失败，页面仍可展示本地资料
@@ -181,19 +188,25 @@ async function load() {
 }
 
 /**
- * 运维入口由服务端判定：只有后台账号能在 /staff/profile 拿到 200，
- * 探不到（无运维会话、非员工、需要改密）都按普通用户处理，不在前端猜身份。
+ * 运维入口由服务端判定：只有后台账号能在 /staff/profile 拿到 200。
+ * 没登录过运维端时给「我是运维」主动入口，能不能进工作台仍由服务端决定，不在前端猜身份。
  */
 async function probeStaff() {
-  if (!getStaffToken()) {
-    staffProfile.value = null
-    return
-  }
   try {
+    if (!getStaffToken()) {
+      staffProfile.value = null
+      return
+    }
     staffProfile.value = await staffRequest({ url: '/api/v1/staff/profile', silent: true })
   } catch (e) {
     staffProfile.value = null
+  } finally {
+    staffReady.value = true
   }
+}
+
+function goStaffLogin() {
+  uni.navigateTo({ url: '/pkg-staff/pages/login/index' })
 }
 
 function goStaffWorkbench() {
